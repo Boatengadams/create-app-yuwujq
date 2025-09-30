@@ -1,108 +1,84 @@
+
 import React from "react";
 import { Stack, router } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View, Text } from "react-native";
-// Components
-import { IconCircle } from "@/components/IconCircle";
+import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { IconSymbol } from "@/components/IconSymbol";
-import { BodyScrollView } from "@/components/BodyScrollView";
-import { Button } from "@/components/button";
-// Constants & Hooks
-import { backgroundColors } from "@/constants/Colors";
-
-const ICON_COLOR = "#007AFF";
 
 export default function HomeScreen() {
-
-  const modalDemos = [
+  const roleCards = [
     {
-      title: "Standard Modal",
-      description: "Full screen modal presentation",
-      route: "/modal",
-      color: "#007AFF",
+      id: 'admin',
+      title: 'Admin',
+      description: 'Oversee analytics, manage users, and approve reports.',
+      icon: 'graduationcap',
+      color: '#4F46E5',
+      route: '/admin'
     },
     {
-      title: "Form Sheet",
-      description: "Bottom sheet with detents and grabber",
-      route: "/formsheet",
-      color: "#34C759",
+      id: 'teacher',
+      title: 'Teacher',
+      description: 'Manage attendance, enter scores, and track student performance.',
+      icon: 'person.crop.rectangle.stack',
+      color: '#10B981',
+      route: '/teacher'
     },
     {
-      title: "Transparent Modal",
-      description: "Overlay without obscuring background",
-      route: "/transparent-modal",
-      color: "#FF9500",
+      id: 'parent',
+      title: 'Parent',
+      description: 'View your child\'s progress, attendance, and reports.',
+      icon: 'person.2',
+      color: '#F59E0B',
+      route: '/parent'
     }
   ];
 
-  const renderModalDemo = ({ item }: { item: typeof modalDemos[0] }) => (
-    <View style={styles.demoCard}>
-      <View style={[styles.demoIcon, { backgroundColor: item.color }]}>
-        <IconSymbol name="square.grid.3x3" color="white" size={24} />
-      </View>
-      <View style={styles.demoContent}>
-        <Text style={styles.demoTitle}>{item.title}</Text>
-        <Text style={styles.demoDescription}>{item.description}</Text>
-      </View>
-      <Button
-        variant="outline"
-        size="sm"
-        onPress={() => router.push(item.route as any)}
-      >
-        Try It
-      </Button>
-    </View>
-  );
-
-  const renderEmptyList = () => (
-    <BodyScrollView contentContainerStyle={styles.emptyStateContainer}>
-      <IconCircle
-        emoji=""
-        backgroundColor={
-          backgroundColors[Math.floor(Math.random() * backgroundColors.length)]
-        }
-      />
-    </BodyScrollView>
-  );
-
-  const renderHeaderRight = () => (
-    <Pressable
-      onPress={() => {console.log("plus")}}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol name="plus" color={ICON_COLOR} />
-    </Pressable>
-  );
-
-  const renderHeaderLeft = () => (
-    <Pressable
-      onPress={() => {console.log("gear")}}
-      style={styles.headerButtonContainer}
-    >
-      <IconSymbol
-        name="gear"
-        color={ICON_COLOR}
-      />
-    </Pressable>
-  );
+  const handleRolePress = (route: string) => {
+    console.log(`Navigating to ${route}`);
+    router.push(route as any);
+  };
 
   return (
     <>
       <Stack.Screen
         options={{
-          title: "Building the app...",
-          headerRight: renderHeaderRight,
-          headerLeft: renderHeaderLeft,
+          headerShown: false,
         }}
       />
       <View style={styles.container}>
-        <FlatList
-          data={modalDemos}
-          renderItem={renderModalDemo}
-          keyExtractor={(item) => item.route}
-          contentContainerStyle={styles.listContainer}
-          contentInsetAdjustmentBehavior="automatic"
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
-        />
+        >
+          {/* Header Section */}
+          <View style={styles.headerSection}>
+            <Text style={styles.welcomeText}>Welcome to <Text style={styles.brandText}>EduTec</Text></Text>
+            <Text style={styles.subtitleText}>Your AI-Powered School Assistant</Text>
+          </View>
+
+          {/* Role Cards */}
+          <View style={styles.cardsContainer}>
+            {roleCards.map((card) => (
+              <Pressable
+                key={card.id}
+                style={[styles.roleCard, { backgroundColor: card.color }]}
+                onPress={() => handleRolePress(card.route)}
+                android_ripple={{ color: 'rgba(255, 255, 255, 0.2)' }}
+              >
+                <View style={styles.cardContent}>
+                  <View style={styles.iconContainer}>
+                    <IconSymbol 
+                      name={card.icon as any} 
+                      size={40} 
+                      color="white" 
+                    />
+                  </View>
+                  <Text style={styles.cardTitle}>{card.title}</Text>
+                  <Text style={styles.cardDescription}>{card.description}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
       </View>
     </>
   );
@@ -111,71 +87,72 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#0A0E34',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
   headerSection: {
-    padding: 20,
-    paddingBottom: 16,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    alignItems: 'center',
+    marginBottom: 60,
   },
-  headerTitle: {
+  welcomeText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  brandText: {
+    color: '#60A5FA',
+  },
+  subtitleText: {
+    fontSize: 18,
+    color: '#94A3B8',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  cardsContainer: {
+    gap: 20,
+  },
+  roleCard: {
+    borderRadius: 16,
+    padding: 24,
+    minHeight: 160,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  cardContent: {
+    alignItems: 'center',
+  },
+  iconContainer: {
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 50,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  cardTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'white',
     marginBottom: 8,
+    textAlign: 'center',
   },
-  headerSubtitle: {
+  cardDescription: {
     fontSize: 16,
-    color: '#666',
+    color: 'rgba(255, 255, 255, 0.9)',
+    textAlign: 'center',
     lineHeight: 22,
-  },
-  listContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  demoCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  demoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  demoContent: {
-    flex: 1,
-  },
-  demoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  demoDescription: {
-    fontSize: 14,
-    color: '#666',
-    lineHeight: 18,
-  },
-  emptyStateContainer: {
-    alignItems: "center",
-    gap: 8,
-    paddingTop: 100,
-  },
-  headerButtonContainer: {
-    padding: 6, // Just enough padding around the 24px icon
+    paddingHorizontal: 8,
   },
 });
