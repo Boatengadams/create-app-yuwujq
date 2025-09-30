@@ -401,9 +401,10 @@ export default function AdminScreen() {
           headerStyle: { backgroundColor: '#1f2937' },
           headerTintColor: 'white',
           headerTitleStyle: { fontWeight: 'bold' },
-          headerRight: () => (
-            <Pressable onPress={() => router.back()} style={styles.logoutButton}>
-              <Text style={styles.logoutText}>Logout</Text>
+          headerLeft: () => (
+            <Pressable onPress={() => router.back()} style={styles.headerBackButton}>
+              <IconSymbol name="chevron.left" size={20} color="white" />
+              <Text style={styles.headerBackText}>Back</Text>
             </Pressable>
           ),
         }}
@@ -452,6 +453,17 @@ export default function AdminScreen() {
 
             {/* Dynamic Content */}
             {renderDashboardContent()}
+
+            {/* Back to Home Button */}
+            <View style={styles.backButtonContainer}>
+              <Button
+                onPress={() => router.back()}
+                style={styles.backToHomeButton}
+              >
+                <IconSymbol name="house" size={16} color="white" style={styles.backButtonIcon} />
+                Back to Home
+              </Button>
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -464,17 +476,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f3f4f6',
   },
-  logoutButton: {
-    backgroundColor: '#374151',
-    paddingHorizontal: 16,
+  headerBackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 6,
-    marginRight: 10,
+    marginLeft: 8,
   },
-  logoutText: {
+  headerBackText: {
     color: 'white',
+    fontSize: 16,
     fontWeight: '600',
-    fontSize: 14,
+    marginLeft: 4,
   },
   mainContent: {
     flex: 1,
@@ -822,5 +835,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
     marginTop: 2,
+  },
+  backButtonContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    marginBottom: 20,
+  },
+  backToHomeButton: {
+    backgroundColor: '#1f2937',
+    flexDirection: 'row',
+    alignItems: 'center',
+    minWidth: 200,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  backButtonIcon: {
+    marginRight: 8,
   },
 });
