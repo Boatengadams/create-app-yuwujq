@@ -6,6 +6,8 @@ import { Button } from "@/components/button";
 import { IconSymbol } from "@/components/IconSymbol";
 import { BarChart, LineChart } from "react-native-chart-kit";
 import Dropdown from "@/components/Dropdown";
+import PendingStudentApprovals from "@/components/PendingStudentApprovals";
+import type { Student, User } from "@/types";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -14,6 +16,58 @@ export default function AdminScreen() {
   const [notificationTitle, setNotificationTitle] = useState("");
   const [notificationMessage, setNotificationMessage] = useState("");
   const [activeSection, setActiveSection] = useState("Dashboard");
+
+  // Sample data for students and users
+  const [allStudents, setAllStudents] = useState<Student[]>([
+    {
+      id: "1",
+      name: "John Doe",
+      dob: "2010-05-15",
+      photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
+      status: "pending",
+      requestingTeacherId: "teacher1",
+      class: "JHS 1 Science"
+    },
+    {
+      id: "2",
+      name: "Jane Smith",
+      dob: "2011-03-22",
+      photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face",
+      status: "pending",
+      requestingTeacherId: "teacher1",
+      class: "JHS 1 Arts"
+    },
+    {
+      id: "3",
+      name: "Mike Johnson",
+      dob: "2010-08-10",
+      photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
+      status: "approved",
+      requestingTeacherId: "teacher1",
+      class: "JHS 1 Science"
+    }
+  ]);
+
+  const [allUsers] = useState<User[]>([
+    {
+      id: "teacher1",
+      name: "Mr. David",
+      email: "david@school.com",
+      role: "teacher"
+    },
+    {
+      id: "parent1",
+      name: "Mrs. Johnson",
+      email: "johnson@email.com",
+      role: "parent"
+    },
+    {
+      id: "admin1",
+      name: "Ms. Grace Nortey",
+      email: "grace@school.com",
+      role: "admin"
+    }
+  ]);
 
   const audienceOptions = ["All Parents", "All Teachers", "All Students", "Specific Class"];
 
@@ -66,9 +120,11 @@ export default function AdminScreen() {
     }
   };
 
+  const pendingStudentsCount = allStudents.filter(s => s.status === 'pending').length;
+
   const sidebarItems = [
     { title: "Dashboard", icon: "chart.bar.fill", active: activeSection === "Dashboard" },
-    { title: "Pending Approvals", icon: "clock", count: 0, active: activeSection === "Pending Approvals" },
+    { title: "Pending Approvals", icon: "clock", count: pendingStudentsCount, active: activeSection === "Pending Approvals" },
     { title: "Manage Teachers", icon: "person.2", active: activeSection === "Manage Teachers" },
     { title: "Manage Parents", icon: "person.3", active: activeSection === "Manage Parents" },
     { title: "Manage Students", icon: "graduationcap", active: activeSection === "Manage Students" },
@@ -102,6 +158,30 @@ export default function AdminScreen() {
     console.log(`Navigate to ${title}`);
   };
 
+  const handleApproveStudent = (studentId: string) => {
+    console.log(`Approving student with ID: ${studentId}`);
+    setAllStudents(prevStudents => 
+      prevStudents.map(student => 
+        student.id === studentId 
+          ? { ...student, status: 'approved' as const }
+          : student
+      )
+    );
+    Alert.alert("Success", "Student registration approved!");
+  };
+
+  const handleRejectStudent = (studentId: string) => {
+    console.log(`Rejecting student with ID: ${studentId}`);
+    setAllStudents(prevStudents => 
+      prevStudents.map(student => 
+        student.id === studentId 
+          ? { ...student, status: 'rejected' as const }
+          : student
+      )
+    );
+    Alert.alert("Success", "Student registration rejected!");
+  };
+
   const renderDashboardContent = () => {
     switch (activeSection) {
       case "Dashboard":
@@ -111,15 +191,15 @@ export default function AdminScreen() {
             <View style={styles.statsContainer}>
               <View style={styles.statCard}>
                 <Text style={styles.statLabel}>Total Students</Text>
-                <Text style={styles.statValue}>2</Text>
+                <Text style={styles.statValue}>{allStudents.filter(s => s.status === 'approved').length}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statLabel}>Total Teachers</Text>
-                <Text style={styles.statValue}>1</Text>
+                <Text style={styles.statValue}>{allUsers.filter(u => u.role === 'teacher').length}</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statLabel}>Parent Accounts</Text>
-                <Text style={styles.statValue}>2</Text>
+                <Text style={styles.statValue}>{allUsers.filter(u => u.role === 'parent').length}</Text>
               </View>
             </View>
 
@@ -217,14 +297,12 @@ export default function AdminScreen() {
       
       case "Pending Approvals":
         return (
-          <View style={styles.sectionContent}>
-            <Text style={styles.sectionTitle}>Pending Approvals</Text>
-            <View style={styles.emptyState}>
-              <IconSymbol name="checkmark.circle" size={48} color="#10b981" />
-              <Text style={styles.emptyStateText}>No pending approvals</Text>
-              <Text style={styles.emptyStateSubtext}>All requests have been processed</Text>
-            </View>
-          </View>
+          <PendingStudentApprovals
+            allStudents={allStudents}
+            allUsers={allUsers}
+            onApprove={handleApproveStudent}
+            onReject={handleRejectStudent}
+          />
         );
 
       case "Manage Teachers":
@@ -252,24 +330,18 @@ export default function AdminScreen() {
         return (
           <View style={styles.sectionContent}>
             <Text style={styles.sectionTitle}>Manage Parents</Text>
-            <Text style={styles.sectionSubtitle}>2 Parent Accounts</Text>
+            <Text style={styles.sectionSubtitle}>{allUsers.filter(u => u.role === 'parent').length} Parent Accounts</Text>
             <View style={styles.parentsList}>
-              <View style={styles.parentCard}>
-                <IconSymbol name="person.circle.fill" size={32} color="#6b7280" />
-                <View style={styles.parentInfo}>
-                  <Text style={styles.parentName}>Parent Account 1</Text>
-                  <Text style={styles.parentEmail}>parent1@example.com</Text>
+              {allUsers.filter(u => u.role === 'parent').map(parent => (
+                <View key={parent.id} style={styles.parentCard}>
+                  <IconSymbol name="person.circle.fill" size={32} color="#6b7280" />
+                  <View style={styles.parentInfo}>
+                    <Text style={styles.parentName}>{parent.name}</Text>
+                    <Text style={styles.parentEmail}>{parent.email}</Text>
+                  </View>
+                  <Button style={styles.actionButton}>View</Button>
                 </View>
-                <Button style={styles.actionButton}>View</Button>
-              </View>
-              <View style={styles.parentCard}>
-                <IconSymbol name="person.circle.fill" size={32} color="#6b7280" />
-                <View style={styles.parentInfo}>
-                  <Text style={styles.parentName}>Parent Account 2</Text>
-                  <Text style={styles.parentEmail}>parent2@example.com</Text>
-                </View>
-                <Button style={styles.actionButton}>View</Button>
-              </View>
+              ))}
             </View>
           </View>
         );
@@ -278,24 +350,18 @@ export default function AdminScreen() {
         return (
           <View style={styles.sectionContent}>
             <Text style={styles.sectionTitle}>Manage Students</Text>
-            <Text style={styles.sectionSubtitle}>2 Students Enrolled</Text>
+            <Text style={styles.sectionSubtitle}>{allStudents.filter(s => s.status === 'approved').length} Students Enrolled</Text>
             <View style={styles.studentsList}>
-              <View style={styles.studentCard}>
-                <IconSymbol name="graduationcap" size={32} color="#3b82f6" />
-                <View style={styles.studentInfo}>
-                  <Text style={styles.studentName}>Student 1</Text>
-                  <Text style={styles.studentClass}>JHS 1 Science</Text>
+              {allStudents.filter(s => s.status === 'approved').map(student => (
+                <View key={student.id} style={styles.studentCard}>
+                  <IconSymbol name="graduationcap" size={32} color="#3b82f6" />
+                  <View style={styles.studentInfo}>
+                    <Text style={styles.studentName}>{student.name}</Text>
+                    <Text style={styles.studentClass}>{student.class}</Text>
+                  </View>
+                  <Button style={styles.actionButton}>View Profile</Button>
                 </View>
-                <Button style={styles.actionButton}>View Profile</Button>
-              </View>
-              <View style={styles.studentCard}>
-                <IconSymbol name="graduationcap" size={32} color="#3b82f6" />
-                <View style={styles.studentInfo}>
-                  <Text style={styles.studentName}>Student 2</Text>
-                  <Text style={styles.studentClass}>JHS 1 Science</Text>
-                </View>
-                <Button style={styles.actionButton}>View Profile</Button>
-              </View>
+              ))}
             </View>
           </View>
         );
@@ -441,7 +507,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   countBadge: {
-    backgroundColor: '#6b7280',
+    backgroundColor: '#ef4444',
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
